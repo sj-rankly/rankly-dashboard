@@ -1,5 +1,9 @@
 import { Dashboard } from '@/components/Dashboard'
 
-export default function DashboardPage() {
-  return <Dashboard />
+interface DashboardPageProps {
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default function DashboardPage({ searchParams }: DashboardPageProps) {
+  return <Dashboard initialTab={searchParams.tab as string} />
 }

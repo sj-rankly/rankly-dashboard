@@ -3,13 +3,27 @@
 import { useState } from 'react'
 import { Sidebar } from './layout/Sidebar'
 import { TopNav } from './layout/TopNav'
-import { UnifiedVisibilitySection } from './sections/UnifiedVisibilitySection'
-import { ShareOfVoiceCard } from './cards/ShareOfVoiceCard'
+import { 
+  VisibilityTab, 
+  PromptsTab, 
+  ClustersTab, 
+  SentimentTab, 
+  CitationsTab 
+} from './tabs'
 import { mockDashboardData } from '@/data/mockData'
 
-export function Dashboard() {
-  const [activeTab, setActiveTab] = useState('visibility')
+interface DashboardProps {
+  initialTab?: string
+}
+
+export function Dashboard({ initialTab }: DashboardProps) {
+  const [activeTab, setActiveTab] = useState(initialTab || 'visibility')
   const [dashboardData, setDashboardData] = useState(mockDashboardData)
+  const [isPromptBuilderFullScreen, setIsPromptBuilderFullScreen] = useState(false)
+
+  const handleTogglePromptBuilderFullScreen = (isFullScreen: boolean) => {
+    setIsPromptBuilderFullScreen(isFullScreen)
+  }
 
   const handlePlatformChange = (platformId: string, enabled: boolean) => {
     setDashboardData(prev => ({
@@ -55,65 +69,20 @@ export function Dashboard() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'visibility':
-        return (
-          <div className="space-y-6">
-            {/* Unified Visibility Score Section */}
-            <UnifiedVisibilitySection />
-
-            {/* Share of Voice Section - Full Width */}
-            <ShareOfVoiceCard />
-          </div>
-        )
+        return <VisibilityTab />
       
       case 'prompts':
-        return (
-          <div className="flex items-center justify-center h-96 text-muted-foreground">
-            <div className="text-center space-y-3">
-              <h3 className="text-2xl font-semibold tracking-tight">Prompts Analysis</h3>
-              <p className="text-base leading-7">Prompt performance metrics and insights will be displayed here.</p>
-            </div>
-          </div>
-        )
+        return <PromptsTab onToggleFullScreen={handleTogglePromptBuilderFullScreen} />
       
-      case 'platforms':
-        return (
-          <div className="flex items-center justify-center h-96 text-muted-foreground">
-            <div className="text-center space-y-3">
-              <h3 className="text-2xl font-semibold tracking-tight">Platform Analysis</h3>
-              <p className="text-base leading-7">Platform-specific performance data will be displayed here.</p>
-            </div>
-          </div>
-        )
+      case 'clusters':
+        return <ClustersTab />
       
-      case 'regions':
-        return (
-          <div className="flex items-center justify-center h-96 text-muted-foreground">
-            <div className="text-center space-y-3">
-              <h3 className="text-2xl font-semibold tracking-tight">Regional Analysis</h3>
-              <p className="text-base leading-7">Geographic performance insights will be displayed here.</p>
-            </div>
-          </div>
-        )
       
       case 'sentiment':
-        return (
-          <div className="flex items-center justify-center h-96 text-muted-foreground">
-            <div className="text-center space-y-3">
-              <h3 className="text-2xl font-semibold tracking-tight">Sentiment Analysis</h3>
-              <p className="text-base leading-7">Sentiment metrics and tone analysis will be displayed here.</p>
-            </div>
-          </div>
-        )
+        return <SentimentTab />
       
-      case 'analytics':
-        return (
-          <div className="flex items-center justify-center h-96 text-muted-foreground">
-            <div className="text-center space-y-3">
-              <h3 className="text-2xl font-semibold tracking-tight">Advanced Analytics</h3>
-              <p className="text-base leading-7">Detailed analytics and custom reports will be displayed here.</p>
-            </div>
-          </div>
-        )
+      case 'citations':
+        return <CitationsTab />
       
       default:
         return null
@@ -122,19 +91,23 @@ export function Dashboard() {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <div className="flex-shrink-0">
-        <Sidebar />
-      </div>
+      {/* Sidebar - hidden when Prompt Builder is full screen */}
+      {!isPromptBuilderFullScreen && (
+        <div className="flex-shrink-0">
+          <Sidebar />
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Navigation with integrated filters */}
-        <TopNav activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Top Navigation - hidden when Prompt Builder is full screen */}
+        {!isPromptBuilderFullScreen && (
+          <TopNav activeTab={activeTab} onTabChange={setActiveTab} />
+        )}
 
         {/* Content Area */}
-        <main className="flex-1 overflow-auto bg-gray-50 dark:bg-neutral-950">
-          <div className="px-4 py-6">
+        <main className={`flex-1 overflow-auto ${isPromptBuilderFullScreen ? 'bg-background' : 'bg-gray-50 dark:bg-neutral-950'}`}>
+          <div className={isPromptBuilderFullScreen ? '' : 'px-2 py-4'}>
             {renderTabContent()}
           </div>
         </main>
@@ -142,3 +115,4 @@ export function Dashboard() {
     </div>
   )
 }
+

@@ -14,10 +14,7 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
   const tabs = [
     { id: 'visibility', label: 'Visibility' },
     { id: 'prompts', label: 'Prompts' },
-    { id: 'platforms', label: 'Platforms' },
-    { id: 'regions', label: 'Regions' },
-    { id: 'personas', label: 'Personas' },
-    { id: 'shopping', label: 'Shopping', hasBeta: true },
+    { id: 'clusters', label: 'Clusters' },
     { id: 'sentiment', label: 'Sentiment' },
     { id: 'citations', label: 'Citations' },
   ]
