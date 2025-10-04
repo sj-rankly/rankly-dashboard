@@ -1,9 +1,10 @@
 import { Dashboard } from '@/components/Dashboard'
 
 interface DashboardPageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default function DashboardPage({ searchParams }: DashboardPageProps) {
-  return <Dashboard initialTab={searchParams.tab as string} />
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams
+  return <Dashboard initialTab={params.tab as string} />
 }

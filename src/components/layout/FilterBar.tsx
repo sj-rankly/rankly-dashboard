@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon, Download, Settings2 } from 'lucide-react'
+import { CalendarIcon, Settings2 } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { format } from 'date-fns'
 import { MultiSelect } from '@/components/ui/multi-select'
@@ -130,10 +130,6 @@ export function FilterBar({
               <DropdownMenuItem className="font-medium">Configure Chart 2</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm" className="rounded-full border px-4 py-2 h-9 font-medium">
-            <Download className="mr-2 h-4 w-4" /> 
-            Export 32 Answers
-          </Button>
         </div>
       </div>
     </div>

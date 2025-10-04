@@ -31,7 +31,7 @@ export function VisibilityBarChart({ data }: VisibilityBarChartProps) {
         />
         <Bar 
           dataKey="value" 
-          fill="hsl(var(--primary))" 
+          fill="#3B82F6" 
           radius={[6, 6, 0, 0]}
           maxBarSize={40}
         />

@@ -29,7 +29,7 @@ export function AvgPositionBar({ data }: AvgPositionBarProps) {
           }}
           cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }}
         />
-        <Bar dataKey="value" fill="hsl(var(--chart-3))" radius={[6, 6, 0, 0]} maxBarSize={40} />
+        <Bar dataKey="value" fill="#8B5CF6" radius={[6, 6, 0, 0]} maxBarSize={40} />
       </BarChart>
     </ResponsiveContainer>
   )

@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Info, ArrowUp, ArrowDown, Minus, ChevronDown, Settings } from 'lucide-react'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts'
+
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { cn } from '@/lib/utils'
 
 interface ShareOfVoiceData {
@@ -39,11 +40,11 @@ interface ShareOfVoiceCardProps {
 }
 
 const CHART_COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))', 
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))'
+  '#3B82F6', // Blue
+  '#EF4444', // Red
+  '#8B5CF6', // Purple
+  '#06B6D4', // Cyan
+  '#10B981'  // Green
 ]
 
 export function ShareOfVoiceCard({ data }: ShareOfVoiceCardProps) {
@@ -89,11 +90,11 @@ export function ShareOfVoiceCard({ data }: ShareOfVoiceCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setChartType('donut')}>
-                Donut Chart
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setChartType('bar')}>
                 Bar Chart
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setChartType('donut')}>
+                Donut Chart
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -126,41 +127,75 @@ export function ShareOfVoiceCard({ data }: ShareOfVoiceCardProps) {
         {/* Chart */}
         <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data.chartData}
-                cx="50%"
-                cy="45%"
-                innerRadius={40}
-                outerRadius={80}
-                paddingAngle={2}
-                dataKey="value"
-                strokeWidth={2}
-                stroke="hsl(var(--background))"
-              >
+            {chartType === 'donut' ? (
+              <PieChart>
+                <Pie
+                  data={data.chartData}
+                  cx="50%"
+                  cy="45%"
+                  innerRadius={40}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  dataKey="value"
+                  strokeWidth={2}
+                  stroke="hsl(var(--background))"
+                >
+                  {data.chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <RechartsTooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    color: 'hsl(var(--foreground))',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ fontSize: '11px', color: 'hsl(var(--muted-foreground))' }}
+                  iconType="circle"
+                  iconSize={8}
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  height={25}
+                />
+              </PieChart>
+            ) : (
+              <BarChart data={data.chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="hsl(var(--muted))" opacity={0.3} />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                  tickCount={5}
+                />
+                <YAxis hide />
+                <RechartsTooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    color: 'hsl(var(--foreground))',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
+                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }}
+                />
                 {data.chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  <Bar 
+                    key={`bar-${index}`}
+                    dataKey="value" 
+                    fill={CHART_COLORS[index % CHART_COLORS.length]} 
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={40}
+                  />
                 ))}
-              </Pie>
-              <RechartsTooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: 'hsl(var(--foreground))',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                }}
-              />
-              <Legend 
-                wrapperStyle={{ fontSize: '11px', color: 'hsl(var(--muted-foreground))' }}
-                iconType="circle"
-                iconSize={8}
-                layout="horizontal"
-                verticalAlign="bottom"
-                height={25}
-              />
-            </PieChart>
+              </BarChart>
+            )}
           </ResponsiveContainer>
         </div>
       </CardContent>

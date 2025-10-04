@@ -6,9 +6,8 @@ import { TopNav } from './layout/TopNav'
 import { 
   VisibilityTab, 
   PromptsTab, 
-  ClustersTab, 
   SentimentTab, 
-  CitationsTab 
+  CitationsTab
 } from './tabs'
 import { mockDashboardData } from '@/data/mockData'
 
@@ -73,10 +72,6 @@ export function Dashboard({ initialTab }: DashboardProps) {
       
       case 'prompts':
         return <PromptsTab onToggleFullScreen={handleTogglePromptBuilderFullScreen} />
-      
-      case 'clusters':
-        return <ClustersTab />
-      
       
       case 'sentiment':
         return <SentimentTab />

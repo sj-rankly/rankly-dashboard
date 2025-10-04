@@ -263,7 +263,7 @@ function CitationShareSection() {
 
             {/* Expand Button */}
             <div className="flex justify-end pt-2">
-              <Button variant="ghost" size="sm" className="text-sm text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground h-6 px-2">
                 Expand
               </Button>
             </div>
