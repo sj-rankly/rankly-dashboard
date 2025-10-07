@@ -72,32 +72,19 @@ export function Sidebar() {
         
         {/* Theme Toggle */}
         <div className="flex items-center justify-center">
-          <div className="flex items-center bg-muted/50 rounded-full p-0.5" suppressHydrationWarning>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme('light')}
-              className={`h-7 w-7 rounded-full transition-all ${
-                mounted && theme === 'light' 
-                  ? 'bg-background text-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(mounted && theme === 'dark' ? 'light' : 'dark')}
+            className="h-8 w-8 rounded-full bg-muted/50 hover:bg-muted transition-all"
+            suppressHydrationWarning
+          >
+            {mounted && theme === 'dark' ? (
               <Sun className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme('dark')}
-              className={`h-7 w-7 rounded-full transition-all ${
-                mounted && theme === 'dark' 
-                  ? 'bg-background text-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
+            ) : (
               <Moon className="h-4 w-4" />
-            </Button>
-          </div>
+            )}
+          </Button>
         </div>
       </div>
     </aside>

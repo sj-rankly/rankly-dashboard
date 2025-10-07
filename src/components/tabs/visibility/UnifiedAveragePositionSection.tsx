@@ -5,29 +5,68 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Info, Settings, ChevronDown, Expand, Calendar as CalendarIcon } from 'lucide-react'
-import { useState } from 'react'
-import { Label, Pie, PieChart, Sector, Cell } from 'recharts'
+import { Info, Settings, ChevronDown, Expand, Calendar as CalendarIcon, ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Label, Pie, PieChart, Sector, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, LabelList } from 'recharts'
 import { PieSectorDataItem } from 'recharts/types/polar/Pie'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { getDynamicFaviconUrl, handleFaviconError } from '@/lib/faviconUtils'
+import { useSkeletonLoading } from '@/components/ui/with-skeleton-loading'
+import { SkeletonWrapper } from '@/components/ui/skeleton-wrapper'
+import { UnifiedCardSkeleton } from '@/components/ui/unified-card-skeleton'
+
+// Helper functions for trend indicators
+const getTrendIcon = (trend: string) => {
+  switch (trend) {
+    case 'up':
+      return <ArrowUp className="w-3 h-3 text-green-600" />
+    case 'down':
+      return <ArrowDown className="w-3 h-3 text-red-600" />
+    case 'stable':
+      return <Minus className="w-3 h-3 text-gray-500" />
+    default:
+      return null
+  }
+}
+
+const getTrendColor = (trend: string) => {
+  switch (trend) {
+    case 'up':
+      return 'text-green-600'
+    case 'down':
+      return 'text-red-600'
+    case 'stable':
+      return 'text-gray-500'
+    default:
+      return 'text-gray-500'
+  }
+}
 
 // Mock data for Average Position
 const chartData = [
-  { name: 'DataFlow', score: 1.7, color: '#3B82F6' },
-  { name: 'CloudSync', score: 1.8, color: '#10B981' },
-  { name: 'SmartAI', score: 2.0, color: '#8B5CF6' },
-  { name: 'TechCorp', score: 2.0, color: '#EF4444' },
-  { name: 'InnovateTech', score: 2.1, color: '#06B6D4' },
+  { name: 'JPMorgan Chase', score: 1.7, color: '#3B82F6' },
+  { name: 'Bank of America', score: 1.8, color: '#10B981' },
+  { name: 'Wells Fargo', score: 2.0, color: '#8B5CF6' },
+  { name: 'Citibank', score: 2.0, color: '#EF4444' },
+  { name: 'US Bank', score: 2.1, color: '#06B6D4' },
+]
+
+// Mock trend data for line charts
+const trendData = [
+  { month: 'Jan 1', 'US Bank': 2.2, 'JPMorgan Chase': 1.8, 'Bank of America': 1.9, 'Wells Fargo': 2.1, 'Citibank': 2.1 },
+  { month: 'Jan 8', 'US Bank': 2.1, 'JPMorgan Chase': 1.7, 'Bank of America': 1.8, 'Wells Fargo': 2.0, 'Citibank': 2.0 },
+  { month: 'Jan 15', 'US Bank': 2.1, 'JPMorgan Chase': 1.7, 'Bank of America': 1.8, 'Wells Fargo': 2.0, 'Citibank': 2.0 },
+  { month: 'Jan 22', 'US Bank': 2.1, 'JPMorgan Chase': 1.7, 'Bank of America': 1.8, 'Wells Fargo': 2.0, 'Citibank': 2.0 },
 ]
 
 const allRankings = [
-  { rank: 1, name: 'DataFlow', score: '1.7', isOwner: false },
-  { rank: 2, name: 'CloudSync', score: '1.8', isOwner: false },
-  { rank: 3, name: 'SmartAI', score: '2.0', isOwner: false },
-  { rank: 4, name: 'TechCorp', score: '2.1', isOwner: false },
-  { rank: 5, name: 'InnovateTech', score: '2.2', isOwner: true },
+  { rank: 1, name: 'JPMorgan Chase', score: '1.7', isOwner: false, rankChange: 0, trend: 'neutral', change: '0.0' },
+  { rank: 2, name: 'Bank of America', score: '1.8', isOwner: false, rankChange: 1, trend: 'up', change: '+0.1' },
+  { rank: 3, name: 'Wells Fargo', score: '2.0', isOwner: false, rankChange: -1, trend: 'down', change: '-0.1' },
+  { rank: 4, name: 'Citibank', score: '2.1', isOwner: false, rankChange: 0, trend: 'neutral', change: '0.0' },
+  { rank: 5, name: 'US Bank', score: '2.2', isOwner: true, rankChange: 1, trend: 'up', change: '+0.1' },
   { rank: 6, name: 'NextGen Solutions', score: '2.3', isOwner: false },
   { rank: 7, name: 'Future Systems', score: '2.4', isOwner: false },
   { rank: 8, name: 'Digital Dynamics', score: '2.5', isOwner: false },
@@ -55,7 +94,15 @@ const getDisplayRankings = () => {
 
 const rankings = getDisplayRankings()
 
-function UnifiedAveragePositionSection() {
+interface UnifiedAveragePositionSectionProps {
+  filterContext?: {
+    selectedTopics: string[]
+    selectedPersonas: string[]
+    selectedPlatforms: string[]
+  }
+}
+
+function UnifiedAveragePositionSection({ filterContext }: UnifiedAveragePositionSectionProps) {
   const [hoveredBar, setHoveredBar] = useState<{ name: string; score: string; x: number; y: number } | null>(null)
   const [chartType, setChartType] = useState('bar')
   const [activePlatform, setActivePlatform] = useState(chartData[0].name)
@@ -63,6 +110,20 @@ function UnifiedAveragePositionSection() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [comparisonDate, setComparisonDate] = useState<Date | undefined>(undefined)
+
+  // Skeleton loading
+  const { showSkeleton, isVisible } = useSkeletonLoading(filterContext)
+
+  // Auto-switch chart type based on date selection
+  useEffect(() => {
+    if (comparisonDate) {
+      // Range mode - use line chart for trend view
+      setChartType('line')
+    } else {
+      // Single date mode - use bar chart for brand share view
+      setChartType('bar')
+    }
+  }, [comparisonDate])
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
@@ -75,9 +136,21 @@ function UnifiedAveragePositionSection() {
   const comparisonLabel = comparisonDate ? formatDate(comparisonDate) : 'Yesterday'
 
   return (
-    <div className="w-full">
-      {/* Unified Section Container */}
-      <UnifiedCard className="w-full">
+    <SkeletonWrapper
+      show={showSkeleton}
+      isVisible={isVisible}
+      skeleton={
+        <UnifiedCardSkeleton 
+          type="mixed" 
+          chartType={chartType === 'line' ? 'line' : 'bar'}
+          tableColumns={4}
+          tableRows={5}
+        />
+      }
+    >
+      <div className="w-full">
+        {/* Unified Section Container */}
+        <UnifiedCard className="w-full">
         <UnifiedCardContent className="p-6">
           {/* Header Section - Inside the box */}
           <div className="space-y-4 mb-6">
@@ -157,13 +230,14 @@ function UnifiedAveragePositionSection() {
                     variant="outline" 
                     size="sm" 
                     className="body-text bg-background border-border shadow-md hover:bg-muted"
+                    disabled={!!comparisonDate}
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     Chart Config
                     <ChevronDown className="ml-2 h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-full">
                   <DropdownMenuItem onClick={() => setChartType('bar')}>
                     Bar Chart
                   </DropdownMenuItem>
@@ -177,15 +251,15 @@ function UnifiedAveragePositionSection() {
             {/* Title and Score Display */}
             <div className="space-y-2">
               <h3 className="text-foreground">Average Position</h3>
-              <div className="metric text-2xl text-foreground">1.8</div>
+              <div className="metric text-xl font-semibold text-foreground">1.8</div>
             </div>
 
             {/* Contained Chart */}
-            <div className="relative h-48 bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3">
+            <div className="relative h-64 bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4">
               {chartType === 'bar' && (
                 <>
                   {/* Y-axis labels on the left */}
-                  <div className="absolute left-2 top-3 bottom-3 flex flex-col justify-between caption text-muted-foreground">
+                  <div className="absolute left-2 top-4 bottom-3 flex flex-col justify-between caption text-muted-foreground">
                     <span>2.3</span>
                     <span>1.7</span>
                     <span>1.1</span>
@@ -210,10 +284,6 @@ function UnifiedAveragePositionSection() {
                     }}
                     onMouseLeave={() => setHoveredBar(null)}
                   >
-                        {/* Score label above bar */}
-                        <div className="caption text-foreground text-center">
-                          {bar.score}
-                        </div>
                         
                         {/* Vertical Bar */}
                         <div 
@@ -227,7 +297,12 @@ function UnifiedAveragePositionSection() {
                         
                         {/* Company name below bars */}
                         <div className="w-16 h-6 flex items-center justify-center">
-                          <span className="caption text-foreground text-center">{bar.name}</span>
+                          <img 
+                            src={getDynamicFaviconUrl(bar.name)} 
+                            alt={bar.name}
+                            className="w-4 h-4 rounded-sm"
+                            onError={handleFaviconError}
+                          />
                         </div>
                   </div>
                 ))}
@@ -313,10 +388,127 @@ function UnifiedAveragePositionSection() {
                           className="w-3 h-3 rounded-full" 
                           style={{ backgroundColor: item.color }}
                         />
+                        <img
+                          src={getDynamicFaviconUrl(item.name)}
+                          alt={item.name}
+                          className="w-4 h-4 rounded-sm"
+                          onError={handleFaviconError}
+                        />
                         <span className="caption text-foreground">{item.name}</span>
                         <span className="caption text-muted-foreground">
                           {item.score}
                         </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {chartType === 'line' && (
+                <div className="h-full w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={trendData}
+                      margin={{
+                        top: 20,
+                        left: 12,
+                        right: 12,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        tickFormatter={(value) => value.slice(0, 6)}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        domain={[1.5, 2.5]}
+                        tick={{ fontSize: 12 }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          color: 'hsl(var(--foreground))',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                        }}
+                      />
+                      <Line
+                        dataKey="US Bank"
+                        type="monotone"
+                        stroke="#06B6D4"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      >
+                        <LabelList
+                          position="top"
+                          offset={12}
+                          className="fill-foreground"
+                          fontSize={12}
+                        />
+                      </Line>
+                      <Line
+                        dataKey="JPMorgan Chase"
+                        type="monotone"
+                        stroke="#3B82F6"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                      <Line
+                        dataKey="Bank of America"
+                        type="monotone"
+                        stroke="#10B981"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                      <Line
+                        dataKey="Wells Fargo"
+                        type="monotone"
+                        stroke="#8B5CF6"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                      <Line
+                        dataKey="Citibank"
+                        type="monotone"
+                        stroke="#EF4444"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  
+                  {/* Line Chart Legend */}
+                  <div className="mt-4 flex flex-wrap gap-4 justify-center">
+                    {chartData.map((item, index) => (
+                      <div 
+                        key={item.name} 
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={() => setActivePlatform(item.name)}
+                      >
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <img
+                          src={getDynamicFaviconUrl(item.name)}
+                          alt={item.name}
+                          className="w-4 h-4 rounded-sm"
+                          onError={handleFaviconError}
+                        />
+                        <span className="caption text-foreground">{item.name}</span>
                       </div>
                     ))}
                   </div>
@@ -337,7 +529,7 @@ function UnifiedAveragePositionSection() {
                     <div className="text-white font-semibold text-sm">{hoveredBar.name}</div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-gray-300">Score:</span>
-                      <span className="text-white font-medium">{hoveredBar.score}</span>
+                      <span className="text-gray-300 font-medium">{hoveredBar.score}</span>
                     </div>
                   </div>
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-transparent border-t-neutral-900 dark:border-t-neutral-800"></div>
@@ -350,7 +542,7 @@ function UnifiedAveragePositionSection() {
           <div className="space-y-6 pl-8 relative">
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">Average Position Rank</h3>
-              <div className="text-2xl font-bold text-foreground">#{allRankings.find(item => item.isOwner)?.rank || 10}</div>
+              <div className="text-xl font-semibold text-foreground">#{allRankings.find(item => item.isOwner)?.rank || 10}</div>
             </div>
 
             {/* Simple Table */}
@@ -359,7 +551,7 @@ function UnifiedAveragePositionSection() {
                 <TableHeader>
                   <TableRow className="border-border/60">
                     <TableHead className="text-xs font-medium text-muted-foreground py-3 px-0">
-                      Asset
+                      Company
                     </TableHead>
                     <TableHead className="text-right text-xs font-medium text-muted-foreground py-3 px-0">
                       Average Position
@@ -377,23 +569,32 @@ function UnifiedAveragePositionSection() {
                     >
                       <TableCell className="py-3 px-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-muted-foreground w-6">
-                            {item.rank}.
+                          <img
+                            src={getDynamicFaviconUrl(item.name)}
+                            alt={item.name}
+                            className="w-4 h-4 rounded-sm"
+                            onError={handleFaviconError}
+                          />
+                          <span 
+                            className="text-sm font-medium" 
+                            style={{color: item.isOwner ? '#2563EB' : 'inherit'}}
+                          >
+                            {item.name}
                           </span>
-                          <div className="flex items-center gap-2">
-                            <span 
-                              className="text-sm font-medium" 
-                              style={{color: item.isOwner ? '#2563EB' : 'inherit'}}
-                            >
-                              {item.name}
-                            </span>
-                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-right py-3 px-0">
-                        <span className="text-sm font-medium text-foreground">
-                          {item.score}
-                        </span>
+                        <div className="flex items-center justify-end gap-2">
+                          <span className="text-sm font-medium text-foreground">
+                            #{item.rank}
+                          </span>
+                          {showComparison && item.rankChange !== 0 && (
+                            <div className={`flex items-center gap-1 ${getTrendColor(item.trend || 'neutral')}`}>
+                              {getTrendIcon(item.trend || 'neutral')}
+                              <span className="text-xs">{item.change || '0.0'}</span>
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -402,7 +603,7 @@ function UnifiedAveragePositionSection() {
             </div>
 
             {/* Expand Button - Bottom Right */}
-            <div className="absolute bottom-2 right-0">
+            <div className="absolute bottom-2 right-2">
               <Dialog open={showExpandedRankings} onOpenChange={setShowExpandedRankings}>
                 <DialogTrigger asChild>
                   <Button 
@@ -423,7 +624,7 @@ function UnifiedAveragePositionSection() {
                       <TableHeader>
                         <TableRow className="border-border/60">
                           <TableHead className="text-xs font-medium text-muted-foreground py-3 px-0">
-                            Asset
+                            Company
                           </TableHead>
                           <TableHead className="text-right text-xs font-medium text-muted-foreground py-3 px-0">
                             Average Position
@@ -441,17 +642,18 @@ function UnifiedAveragePositionSection() {
                           >
                             <TableCell className="py-3 px-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-muted-foreground w-6">
-                                  {item.rank}.
+                                <img
+                                  src={getDynamicFaviconUrl(item.name)}
+                                  alt={item.name}
+                                  className="w-4 h-4 rounded-sm"
+                                  onError={handleFaviconError}
+                                />
+                                <span 
+                                  className="text-sm font-medium font-semibold" 
+                                  style={{color: item.isOwner ? '#2563EB' : 'inherit'}}
+                                >
+                                  {item.name}
                                 </span>
-                                <div className="flex items-center gap-2">
-                                  <span 
-                                    className="text-sm font-medium font-semibold" 
-                                    style={{color: item.isOwner ? '#2563EB' : 'inherit'}}
-                                  >
-                                    {item.name}
-                                  </span>
-                                </div>
                               </div>
                             </TableCell>
                             <TableCell className="text-right py-3 px-0">
@@ -476,6 +678,7 @@ function UnifiedAveragePositionSection() {
         </UnifiedCardContent>
       </UnifiedCard>
     </div>
+    </SkeletonWrapper>
   )
 }
 

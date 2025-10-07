@@ -92,7 +92,7 @@ export function PromptDesignerPage({ onBack }: PromptDesignerPageProps) {
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Topics (2)</h3>
-              <ChevronUpDown className="w-4 h-4 text-muted-foreground" />
+              <ChevronsUpDown className="w-4 h-4 text-muted-foreground" />
             </div>
             
             <div className="space-y-2">
@@ -146,7 +146,7 @@ export function PromptDesignerPage({ onBack }: PromptDesignerPageProps) {
               >
                 {tab.id === "platforms" && <Layers className="w-4 h-4" />}
                 {tab.label}
-                {tab.id === "platforms" && <ChevronUpDown className="w-3 h-3" />}
+                {tab.id === "platforms" && <ChevronsUpDown className="w-3 h-3" />}
               </Button>
             ))}
           </div>
@@ -201,7 +201,7 @@ export function PromptDesignerPage({ onBack }: PromptDesignerPageProps) {
               />
               <span className="text-sm font-medium flex items-center gap-2">
                 Prompts ({prompts.length})
-                <ChevronUpDown className="w-4 h-4 text-muted-foreground" />
+                <ChevronsUpDown className="w-4 h-4 text-muted-foreground" />
               </span>
             </div>
           </div>

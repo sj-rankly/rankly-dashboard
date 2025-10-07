@@ -1,7 +1,9 @@
 import React from 'react'
 import { UnifiedCard, UnifiedCardContent } from '@/components/ui/unified-card'
-import { Badge } from '@/components/ui/badge'
-import { ChevronRight } from 'lucide-react'
+import { getDynamicFaviconUrl, handleFaviconError } from '@/lib/faviconUtils'
+import { useSkeletonLoading } from '@/components/ui/with-skeleton-loading'
+import { SkeletonWrapper } from '@/components/ui/skeleton-wrapper'
+import { UnifiedCardSkeleton } from '@/components/ui/unified-card-skeleton'
 
 // Mock data for topic rankings
 const topicData = [
@@ -10,11 +12,11 @@ const topicData = [
     status: 'Needs work',
     statusColor: 'bg-red-500',
     rankings: [
-      { rank: 1, name: 'DataFlow' },
-      { rank: 2, name: 'CloudSync' },
-      { rank: 3, name: 'SmartAI' },
-      { rank: 4, name: 'TechCorp' },
-      { rank: 5, name: 'InnovateTech', isOwner: true },
+      { rank: 1, name: 'JPMorgan Chase' },
+      { rank: 2, name: 'Bank of America' },
+      { rank: 3, name: 'Wells Fargo' },
+      { rank: 4, name: 'Citibank' },
+      { rank: 5, name: 'US Bank', isOwner: true },
       { rank: 6, name: 'NextGen Solutions' },
       { rank: 7, name: 'Future Systems' },
       { rank: 8, name: 'Digital Dynamics' },
@@ -28,11 +30,11 @@ const topicData = [
     statusColor: 'bg-green-500',
     rankings: [
       { rank: 1, name: 'TechVision Corp' },
-      { rank: 2, name: 'DataFlow' },
-      { rank: 3, name: 'CloudSync' },
-      { rank: 4, name: 'SmartAI' },
-      { rank: 5, name: 'TechCorp' },
-      { rank: 6, name: 'InnovateTech' },
+      { rank: 2, name: 'JPMorgan Chase' },
+      { rank: 3, name: 'Bank of America' },
+      { rank: 4, name: 'Wells Fargo' },
+      { rank: 5, name: 'Citibank' },
+      { rank: 6, name: 'US Bank' },
       { rank: 7, name: 'NextGen Solutions' },
       { rank: 8, name: 'Future Systems' },
       { rank: 9, name: 'Digital Dynamics' },
@@ -41,9 +43,24 @@ const topicData = [
   },
 ]
 
-function UnifiedTopicRankingsSection() {
+interface UnifiedTopicRankingsSectionProps {
+  filterContext?: {
+    selectedTopics: string[]
+    selectedPersonas: string[]
+    selectedPlatforms: string[]
+  }
+}
+
+function UnifiedTopicRankingsSection({ filterContext }: UnifiedTopicRankingsSectionProps) {
+  const { showSkeleton, isVisible } = useSkeletonLoading(filterContext)
+
   return (
-    <div className="w-full space-y-4">
+    <SkeletonWrapper
+      show={showSkeleton}
+      isVisible={isVisible}
+      skeleton={<UnifiedCardSkeleton type="table" tableColumns={3} tableRows={4} />}
+    >
+      <div className="w-full space-y-4">
       {/* Header Section - Outside the box */}
       <div className="flex items-center justify-between">
         <div>
@@ -57,7 +74,7 @@ function UnifiedTopicRankingsSection() {
 
       {/* Main Content Box */}
       <UnifiedCard className="w-full">
-        <UnifiedCardContent className="p-4">
+        <UnifiedCardContent className="p-6">
           <div className="space-y-4">
             {/* Table Header */}
             <div className="grid grid-cols-7 gap-4 items-center text-sm font-medium text-muted-foreground border-b border-border/60 pb-3">
@@ -74,26 +91,27 @@ function UnifiedTopicRankingsSection() {
               <div key={topic.topic} className="grid grid-cols-7 gap-4 items-center py-3 border-b border-border/30 last:border-b-0">
                 {/* Topic Column */}
                 <div className="col-span-2 flex items-center gap-3">
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">{topic.topic}</span>
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs px-2 py-1 text-white ${topic.statusColor} border-0`}
-                  >
-                    {topic.status}
-                  </Badge>
                 </div>
 
                 {/* Ranking Columns */}
                 {topic.rankings.slice(0, 5).map((ranking) => (
                   <div key={`${topic.topic}-${ranking.rank}`} className="col-span-1 flex justify-center">
                     <div className="w-20 h-8 flex items-center justify-center rounded-full px-2">
-                      <span 
-                        className="text-xs font-medium truncate" 
-                        style={{color: ranking.isOwner ? '#2563EB' : 'inherit'}}
-                      >
-                        {ranking.name}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <img
+                          src={getDynamicFaviconUrl(ranking.name)}
+                          alt={ranking.name}
+                          className="w-3 h-3 rounded-sm"
+                          onError={handleFaviconError}
+                        />
+                        <span 
+                          className="text-xs font-medium truncate" 
+                          style={{color: ranking.isOwner ? '#2563EB' : 'inherit'}}
+                        >
+                          {ranking.name}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -103,6 +121,7 @@ function UnifiedTopicRankingsSection() {
         </UnifiedCardContent>
       </UnifiedCard>
     </div>
+    </SkeletonWrapper>
   )
 }
 

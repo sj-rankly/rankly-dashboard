@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Filter, Globe, ChevronDown, Users } from 'lucide-react'
+import { useFilters } from '@/contexts/FilterContext'
 
 interface TopNavProps {
   activeTab: string
@@ -14,9 +15,14 @@ interface TopNavProps {
 }
 
 export function TopNav({ activeTab, onTabChange }: TopNavProps) {
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['All Platforms'])
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(['All Topics'])
-  const [selectedPersonas, setSelectedPersonas] = useState<string[]>(['All Personas'])
+  const { 
+    selectedPlatforms, 
+    selectedTopics, 
+    selectedPersonas, 
+    setSelectedPlatforms, 
+    setSelectedTopics, 
+    setSelectedPersonas 
+  } = useFilters()
   
   const tabs = [
     { id: 'visibility', label: 'Visibility' },
@@ -27,25 +33,34 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
 
   const topicOptions = [
     { value: 'All Topics', label: 'All Topics' },
-    { value: 'Marketing', label: 'Marketing' },
-    { value: 'Sales', label: 'Sales' },
-    { value: 'Support', label: 'Support' }
+    { value: 'Personalization', label: 'Personalization' },
+    { value: 'Conversion Rate Optimization', label: 'Conversion Rate Optimization' }
   ]
 
   const personaOptions = [
     { value: 'All Personas', label: 'All Personas' },
     { value: 'Marketing Manager', label: 'Marketing Manager' },
-    { value: 'Sales Rep', label: 'Sales Rep' },
-    { value: 'Customer Support', label: 'Customer Support' },
-    { value: 'Product Manager', label: 'Product Manager' }
+    { value: 'Growth Hacker', label: 'Growth Hacker' }
   ]
+
+  const getFaviconUrl = (platformName: string) => {
+    const faviconMap = {
+      'ChatGPT': 'https://chat.openai.com/favicon.ico',
+      'Claude': 'https://claude.ai/favicon.ico',
+      'Gemini': 'https://gemini.google.com/favicon.ico',
+      'Perplexity': 'https://www.perplexity.ai/favicon.ico',
+      'Grok': 'https://x.ai/favicon.ico'
+    }
+    return faviconMap[platformName as keyof typeof faviconMap] || `https://www.google.com/s2/favicons?domain=${platformName.toLowerCase()}.com&sz=16`
+  }
 
   const platformOptions = [
     { value: 'All Platforms', label: 'All Platforms' },
     { value: 'ChatGPT', label: 'ChatGPT' },
     { value: 'Claude', label: 'Claude' },
     { value: 'Gemini', label: 'Gemini' },
-    { value: 'Perplexity', label: 'Perplexity' }
+    { value: 'Perplexity', label: 'Perplexity' },
+    { value: 'Grok', label: 'Grok' }
   ]
 
   const handleTopicChange = (topic: string, checked: boolean) => {
@@ -159,20 +174,21 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
       <div className="pl-4 pt-4 flex justify-between items-center">
         <Tabs value={activeTab} onValueChange={onTabChange}>
           <TabsList className="bg-transparent p-0 h-auto border-0 flex space-x-0">
-            {tabs.map((tab) => (
-              <TabsTrigger 
-                key={tab.id} 
-                value={tab.id} 
+          {tabs.map((tab) => (
+            <TabsTrigger 
+              key={tab.id} 
+              value={tab.id} 
                 className="relative px-4 py-2 body-text rounded-none border-0 bg-transparent hover:text-gray-900 text-gray-600 data-[state=active]:bg-transparent data-[state=active]:text-gray-900 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-gray-900 transition-colors"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+            >
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
         {/* Filter controls - Top right */}
-        <div className="flex space-x-3 pr-4">
+        {activeTab !== 'prompts' && (
+          <div className="flex space-x-3 pr-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="body-text">
@@ -181,7 +197,7 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
                 <ChevronDown className="ml-2 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+            <DropdownMenuContent align="end" className="w-full" onCloseAutoFocus={(e) => e.preventDefault()}>
               {topicOptions.map((option) => (
                 <DropdownMenuCheckboxItem
                   key={option.value}
@@ -203,7 +219,7 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
                 <ChevronDown className="ml-2 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+            <DropdownMenuContent align="end" className="w-full" onCloseAutoFocus={(e) => e.preventDefault()}>
               {personaOptions.map((option) => (
                 <DropdownMenuCheckboxItem
                   key={option.value}
@@ -225,7 +241,7 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
                 <ChevronDown className="ml-2 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+            <DropdownMenuContent align="end" className="w-full" onCloseAutoFocus={(e) => e.preventDefault()}>
               {platformOptions.map((option) => (
                 <DropdownMenuCheckboxItem
                   key={option.value}
@@ -233,16 +249,31 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
                   onCheckedChange={(checked) => handlePlatformChange(option.value, checked)}
                   onSelect={(e) => e.preventDefault()}
                 >
-                  {option.label}
+                  {option.value === 'All Platforms' ? (
+                    option.label
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={getFaviconUrl(option.value)}
+                        alt={option.value}
+                        className="w-4 h-4 rounded-sm"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://www.google.com/s2/favicons?domain=${option.value.toLowerCase()}.com&sz=16`
+                        }}
+                      />
+                      {option.label}
+                    </div>
+                  )}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Section Divider - Moved up */}
-      <div className="border-b border-gray-200 mt-2"></div>
+      <div className="border-b border-border/60 mt-2"></div>
     </div>
   )
 }

@@ -55,7 +55,7 @@ function VisibilityScoreSection() {
               <ChevronDown className="ml-2 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-full">
             <DropdownMenuItem>Bar Chart</DropdownMenuItem>
             <DropdownMenuItem>Line Chart</DropdownMenuItem>
             <DropdownMenuItem>Donut Chart</DropdownMenuItem>

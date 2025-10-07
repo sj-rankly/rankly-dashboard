@@ -67,23 +67,6 @@ export const visibilityScoreData: Metric = {
   ]
 }
 
-// Mock share of voice data
-export const shareOfVoiceData: Metric = {
-  id: 'share-of-voice',
-  title: 'Share of Voice',
-  description: 'Percentage of mentions across all platforms',
-  value: 28.4,
-  unit: '%',
-  change: 4.7,
-  trend: 'up',
-  data: [
-    { name: 'Fibr', value: 28.4, fill: '#3b82f6' },
-    { name: 'Unbounce', value: 22.1, fill: '#f59e0b' },
-    { name: 'Instapage', value: 18.3, fill: '#ef4444' },
-    { name: 'Leadpages', value: 16.2, fill: '#10b981' },
-    { name: 'ConvertKit', value: 15.0, fill: '#8b5cf6' }
-  ]
-}
 
 // Mock average position data
 export const averagePositionData: Metric = {
@@ -157,6 +140,7 @@ export const mockPlatforms: Platform[] = [
   { id: 'perplexity', name: 'Perplexity', enabled: true },
   { id: 'gemini', name: 'Gemini', enabled: false },
   { id: 'claude', name: 'Claude', enabled: true },
+  { id: 'grok', name: 'Grok', enabled: true },
   { id: 'copilot', name: 'Copilot', enabled: false }
 ]
 
@@ -182,7 +166,6 @@ export const mockPersonas: Persona[] = [
 export const mockDashboardData: DashboardData = {
   metrics: {
     visibilityScore: visibilityScoreData,
-    shareOfVoice: shareOfVoiceData,
     averagePosition: averagePositionData,
     topicRankings: mockTopicRankings,
     competitors: mockCompetitors
@@ -198,7 +181,6 @@ export const mockDashboardData: DashboardData = {
 // Export individual data sets for flexibility
 export {
   visibilityScoreData as visibilityData,
-  shareOfVoiceData as shareData,
   averagePositionData as positionData,
   mockTopicRankings as topicRankings,
   mockPlatforms as platforms,

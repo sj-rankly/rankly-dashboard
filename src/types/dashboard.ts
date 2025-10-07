@@ -64,7 +64,6 @@ export interface FilterState {
 
 export interface VisibilityMetrics {
   visibilityScore: Metric
-  shareOfVoice: Metric
   averagePosition: Metric
   topicRankings: TopicRanking[]
   competitors: Competitor[]

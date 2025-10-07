@@ -1,49 +1,47 @@
 // Visibility Tab Components
 export { UnifiedVisibilitySection } from './UnifiedVisibilitySection'
-export { UnifiedWordCountSection } from './UnifiedWordCountSection'
 export { UnifiedDepthOfMentionSection } from './UnifiedDepthOfMentionSection'
 export { UnifiedAveragePositionSection } from './UnifiedAveragePositionSection'
 export { UnifiedTopicRankingsSection } from './UnifiedTopicRankingsSection'
 export { UnifiedPersonaRankingsSection } from './UnifiedPersonaRankingsSection'
-export { ShareOfVoiceCard } from './ShareOfVoiceCard'
-export { UnifiedPositionSection } from './UnifiedPositionSection'
+export { UnifiedPerformanceInsightsSection } from './UnifiedPerformanceInsightsSection'
 
 // Visibility Tab Main Component
 import { UnifiedVisibilitySection } from './UnifiedVisibilitySection'
-import { UnifiedWordCountSection } from './UnifiedWordCountSection'
 import { UnifiedDepthOfMentionSection } from './UnifiedDepthOfMentionSection'
 import { UnifiedAveragePositionSection } from './UnifiedAveragePositionSection'
 import { UnifiedTopicRankingsSection } from './UnifiedTopicRankingsSection'
 import { UnifiedPersonaRankingsSection } from './UnifiedPersonaRankingsSection'
-import { ShareOfVoiceCard } from './ShareOfVoiceCard'
-import { UnifiedPositionSection } from './UnifiedPositionSection'
+import { UnifiedPerformanceInsightsSection } from './UnifiedPerformanceInsightsSection'
 
-export function VisibilityTab() {
+interface VisibilityTabProps {
+  filterContext?: {
+    selectedTopics: string[]
+    selectedPersonas: string[]
+    selectedPlatforms: string[]
+  }
+}
+
+export function VisibilityTab({ filterContext }: VisibilityTabProps) {
   return (
     <div className="space-y-6">
       {/* Unified Visibility Score Section */}
-      <UnifiedVisibilitySection />
-
-      {/* Unified Word Count Section */}
-      <UnifiedWordCountSection />
+      <UnifiedVisibilitySection filterContext={filterContext} />
 
       {/* Unified Depth of Mention Section */}
-      <UnifiedDepthOfMentionSection />
-
-      {/* Share of Voice Section - Full Width */}
-      <ShareOfVoiceCard />
-
-      {/* Unified Position Section */}
-      <UnifiedPositionSection />
+      <UnifiedDepthOfMentionSection filterContext={filterContext} />
 
       {/* Unified Average Position Section */}
-      <UnifiedAveragePositionSection />
+      <UnifiedAveragePositionSection filterContext={filterContext} />
 
       {/* Unified Topic Rankings Section */}
-      <UnifiedTopicRankingsSection />
+      <UnifiedTopicRankingsSection filterContext={filterContext} />
 
       {/* Unified Persona Rankings Section */}
-      <UnifiedPersonaRankingsSection />
+      <UnifiedPersonaRankingsSection filterContext={filterContext} />
+
+      {/* Unified Performance Insights Section */}
+      <UnifiedPerformanceInsightsSection filterContext={filterContext} />
     </div>
   )
 }

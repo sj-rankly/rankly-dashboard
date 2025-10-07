@@ -1,16 +1,33 @@
 // Sentiment Tab Components
 export { SentimentAnalysisSection } from './SentimentAnalysisSection'
 export { SentimentTopicsTable } from './SentimentTopicsTable'
+export { UnifiedSentimentSection } from './UnifiedSentimentSection'
+export { SentimentBreakdownSection } from './SentimentBreakdownSection'
+export { UnifiedPerformanceInsightsSection } from '../visibility/UnifiedPerformanceInsightsSection'
 
 // Sentiment Tab Main Component
-import { SentimentAnalysisSection } from './SentimentAnalysisSection'
-import { SentimentTopicsTable } from './SentimentTopicsTable'
+import { UnifiedSentimentSection } from './UnifiedSentimentSection'
+import { SentimentBreakdownSection } from './SentimentBreakdownSection'
+import { UnifiedPerformanceInsightsSection } from '../visibility/UnifiedPerformanceInsightsSection'
 
-export function SentimentTab() {
+interface SentimentTabProps {
+  filterContext?: {
+    selectedTopics: string[]
+    selectedPersonas: string[]
+    selectedPlatforms: string[]
+  }
+}
+
+export function SentimentTab({ filterContext }: SentimentTabProps) {
   return (
-    <div className="px-4 py-6 space-y-8">
-      <SentimentAnalysisSection />
-      <SentimentTopicsTable />
+    <div className="space-y-6">
+      <UnifiedSentimentSection filterContext={filterContext} />
+      
+      {/* Sentiment Breakdown Section */}
+      <SentimentBreakdownSection filterContext={filterContext} />
+      
+      {/* Performance Insights Section */}
+      <UnifiedPerformanceInsightsSection filterContext={filterContext} />
     </div>
   )
 }

@@ -25,7 +25,7 @@ const weekData = [
 
 export function TrafficTrendsSection() {
   const [timeView, setTimeView] = useState<'day' | 'week'>('day')
-  const [hoveredPoint, setHoveredPoint] = useState<{ date: string; humanVisits: number; agentVisits: number } | null>(null)
+  const [hoveredPoint, setHoveredPoint] = useState<{ date: string; humanVisits: number; agentVisits: number } | { week: string; humanVisits: number; agentVisits: number } | null>(null)
 
   const currentData = timeView === 'day' ? dayData : weekData
   const maxVisits = Math.max(...currentData.map(d => Math.max(d.humanVisits, d.agentVisits)))
@@ -112,7 +112,7 @@ export function TrafficTrendsSection() {
                     textAnchor="middle"
                     className="text-xs fill-muted-foreground"
                   >
-                    {timeView === 'day' ? point.date : point.week}
+                    {timeView === 'day' ? (point as any).date : (point as any).week}
                   </text>
                 ))}
 
@@ -193,7 +193,7 @@ export function TrafficTrendsSection() {
             {hoveredPoint && (
               <div className="fixed z-50 bg-neutral-900 dark:bg-neutral-800 border border-neutral-700 rounded-md px-3 py-2 shadow-lg pointer-events-none">
                 <div className="text-white text-sm space-y-1">
-                  <div className="font-medium">{timeView === 'day' ? hoveredPoint.date : hoveredPoint.week}</div>
+                  <div className="font-medium">{timeView === 'day' ? (hoveredPoint as any).date : (hoveredPoint as any).week}</div>
                   <div className="text-green-400">Human: {hoveredPoint.humanVisits.toLocaleString()}</div>
                   <div className="text-purple-400">Agent: {hoveredPoint.agentVisits.toLocaleString()}</div>
                 </div>

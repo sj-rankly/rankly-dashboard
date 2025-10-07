@@ -9,25 +9,41 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 // Chart components not available, using Recharts directly
 import { Info, TrendingUp, Settings, ChevronDown } from 'lucide-react'
 import { useState, useMemo } from 'react'
-import { Label, Pie, PieChart, Sector } from 'recharts'
+import { Label, Pie, PieChart, Sector, Cell } from 'recharts'
 import { PieSectorDataItem } from 'recharts/types/polar/Pie'
+import { useSkeletonLoading } from '@/components/ui/with-skeleton-loading'
+import { SkeletonWrapper } from '@/components/ui/skeleton-wrapper'
+import { UnifiedCardSkeleton } from '@/components/ui/unified-card-skeleton'
 
 // Mock data for platform traffic
 const platformData = [
-  { platform: 'ChatGPT', percentage: 35, visits: 1250, fill: '#3B82F6', comparisonVisits: 1100 },
-  { platform: 'Perplexity', percentage: 28, visits: 980, fill: '#EF4444', comparisonVisits: 850 },
+  { platform: 'ChatGPT', percentage: 30, visits: 1250, fill: '#3B82F6', comparisonVisits: 1100 },
+  { platform: 'Perplexity', percentage: 25, visits: 980, fill: '#EF4444', comparisonVisits: 850 },
   { platform: 'Gemini', percentage: 20, visits: 720, fill: '#8B5CF6', comparisonVisits: 650 },
-  { platform: 'Claude', percentage: 17, visits: 610, fill: '#10B981', comparisonVisits: 580 },
+  { platform: 'Claude', percentage: 15, visits: 610, fill: '#10B981', comparisonVisits: 580 },
+  { platform: 'Grok', percentage: 10, visits: 420, fill: '#F59E0B', comparisonVisits: 380 },
 ]
 
 // Chart config not needed for direct Recharts usage
 
 const rankings = [
-  { rank: 1, platform: 'ChatGPT', percentage: '35%', visits: '1,250', isTop: true },
-  { rank: 2, platform: 'Perplexity', percentage: '28%', visits: '980', isTop: false },
+  { rank: 1, platform: 'ChatGPT', percentage: '30%', visits: '1,250', isTop: true },
+  { rank: 2, platform: 'Perplexity', percentage: '25%', visits: '980', isTop: false },
   { rank: 3, platform: 'Gemini', percentage: '20%', visits: '720', isTop: false },
-  { rank: 4, platform: 'Claude', percentage: '17%', visits: '610', isTop: false },
+  { rank: 4, platform: 'Claude', percentage: '15%', visits: '610', isTop: false },
+  { rank: 5, platform: 'Grok', percentage: '10%', visits: '420', isTop: false },
 ]
+
+const getFaviconUrl = (platformName: string) => {
+  const faviconMap = {
+    'ChatGPT': 'https://chat.openai.com/favicon.ico',
+    'Claude': 'https://claude.ai/favicon.ico',
+    'Gemini': 'https://gemini.google.com/favicon.ico',
+    'Perplexity': 'https://www.perplexity.ai/favicon.ico',
+    'Grok': 'https://x.ai/favicon.ico'
+  }
+  return faviconMap[platformName as keyof typeof faviconMap] || `https://www.google.com/s2/favicons?domain=${platformName.toLowerCase()}.com&sz=16`
+}
 
 interface PlatformTrafficCardProps {
   title: string
@@ -134,7 +150,7 @@ export function PlatformTrafficCard({
                     <ChevronDown className="ml-2 h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-full">
                   <DropdownMenuItem onClick={() => setChartType('bar')}>
                     Bar Chart
                   </DropdownMenuItem>
@@ -313,13 +329,6 @@ export function PlatformTrafficCard({
                           innerRadius={25}
                           outerRadius={45}
                           strokeWidth={2}
-                          activeIndex={activeIndex}
-                          activeShape={({
-                            outerRadius = 0,
-                            ...props
-                          }: PieSectorDataItem) => (
-                            <Sector {...props} outerRadius={outerRadius + 5} />
-                          )}
                         />
                       )}
                     </PieChart>
@@ -333,9 +342,13 @@ export function PlatformTrafficCard({
                         className="flex items-center gap-2 cursor-pointer"
                         onClick={() => setActivePlatform(item.platform)}
                       >
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: item.fill }}
+                        <img 
+                          src={getFaviconUrl(item.platform)} 
+                          alt={item.platform}
+                          className="w-4 h-4 rounded-sm"
+                          onError={(e) => {
+                            e.currentTarget.src = `https://www.google.com/s2/favicons?domain=${item.platform.toLowerCase()}.com&sz=16`
+                          }}
                         />
                         <span className="caption text-foreground">{item.platform}</span>
                         <span className="caption text-muted-foreground">
@@ -439,6 +452,14 @@ export function PlatformTrafficCard({
                                      {item.rank}.
                                    </span>
                           <div className="flex items-center gap-2">
+                            <img 
+                              src={getFaviconUrl(item.platform)} 
+                              alt={item.platform}
+                              className="w-4 h-4 rounded-sm"
+                              onError={(e) => {
+                                e.currentTarget.src = `https://www.google.com/s2/favicons?domain=${item.platform.toLowerCase()}.com&sz=16`
+                              }}
+                            />
                             <span className={`body-text ${item.isTop ? 'text-primary' : 'text-foreground'}`}>
                               {item.platform}
                             </span>

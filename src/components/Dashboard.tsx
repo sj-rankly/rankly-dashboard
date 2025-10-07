@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Sidebar } from './layout/Sidebar'
 import { TopNav } from './layout/TopNav'
 import { 
@@ -10,6 +10,11 @@ import {
   CitationsTab
 } from './tabs'
 import { mockDashboardData } from '@/data/mockData'
+import { useFilters } from '@/contexts/FilterContext'
+import { useSkeletonLoader } from '@/hooks/useSkeletonLoader'
+import { SkeletonWrapper } from '@/components/ui/skeleton-wrapper'
+import { SidebarSkeleton } from '@/components/layout/SidebarSkeleton'
+import { TopNavSkeleton } from '@/components/layout/TopNavSkeleton'
 
 interface DashboardProps {
   initialTab?: string
@@ -19,6 +24,30 @@ export function Dashboard({ initialTab }: DashboardProps) {
   const [activeTab, setActiveTab] = useState(initialTab || 'visibility')
   const [dashboardData, setDashboardData] = useState(mockDashboardData)
   const [isPromptBuilderFullScreen, setIsPromptBuilderFullScreen] = useState(false)
+  const { selectedTopics, selectedPersonas, selectedPlatforms } = useFilters()
+  
+  // Global skeleton loading state
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false)
+  const { showSkeleton: showGlobalSkeleton, isVisible: isGlobalVisible, setLoading: setGlobalLoading } = useSkeletonLoader({
+    threshold: 300,
+    debounceDelay: 250
+  })
+
+  // Simulate global loading when filters change
+  useEffect(() => {
+    if (selectedTopics.length > 0 || selectedPersonas.length > 0 || selectedPlatforms.length > 0) {
+      setIsGlobalLoading(true)
+      const timer = setTimeout(() => {
+        setIsGlobalLoading(false)
+      }, 1200) // Simulate 1.2s loading time for global state changes
+      
+      return () => clearTimeout(timer)
+    }
+  }, [selectedTopics, selectedPersonas, selectedPlatforms])
+
+  useEffect(() => {
+    setGlobalLoading(isGlobalLoading)
+  }, [isGlobalLoading, setGlobalLoading])
 
   const handleTogglePromptBuilderFullScreen = (isFullScreen: boolean) => {
     setIsPromptBuilderFullScreen(isFullScreen)
@@ -66,18 +95,24 @@ export function Dashboard({ initialTab }: DashboardProps) {
   }
 
   const renderTabContent = () => {
+    const filterContext = {
+      selectedTopics,
+      selectedPersonas,
+      selectedPlatforms
+    }
+
     switch (activeTab) {
       case 'visibility':
-        return <VisibilityTab />
+        return <VisibilityTab filterContext={filterContext} />
       
       case 'prompts':
-        return <PromptsTab onToggleFullScreen={handleTogglePromptBuilderFullScreen} />
+        return <PromptsTab onToggleFullScreen={handleTogglePromptBuilderFullScreen} filterContext={filterContext} />
       
       case 'sentiment':
-        return <SentimentTab />
+        return <SentimentTab filterContext={filterContext} />
       
       case 'citations':
-        return <CitationsTab />
+        return <CitationsTab filterContext={filterContext} />
       
       default:
         return null
