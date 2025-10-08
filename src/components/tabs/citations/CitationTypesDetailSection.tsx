@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Textarea } from '@/components/ui/textarea'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu'
+import { useTheme } from 'next-themes'
 import { useSkeletonLoading } from '@/components/ui/with-skeleton-loading'
 import { SkeletonWrapper } from '@/components/ui/skeleton-wrapper'
 import { UnifiedCardSkeleton } from '@/components/ui/unified-card-skeleton'
@@ -260,19 +261,20 @@ const citationTypesDetail = [
 ]
 
 // Favicon mapping function
-const getFaviconUrl = (platformName: string) => {
+const getFaviconUrl = (platformName: string, theme?: string) => {
+  const isDarkMode = theme === 'dark'
   const faviconMap = {
     'ChatGPT': 'https://chat.openai.com/favicon.ico',
     'Claude': 'https://claude.ai/favicon.ico',
-    'Gemini': 'https://gemini.google.com/favicon.ico',
+    'Gemini': 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg',
     'Perplexity': 'https://www.perplexity.ai/favicon.ico',
-    'Grok': 'https://x.ai/favicon.ico'
+    'Grok': isDarkMode ? 'https://www.google.com/s2/favicons?domain=x.ai&sz=16&color=white' : 'https://grok.x.ai/favicon.ico'
   }
   return faviconMap[platformName as keyof typeof faviconMap] || `https://www.google.com/s2/favicons?domain=${platformName.toLowerCase()}.com&sz=16`
 }
 
 // Component to render inline platform data with real favicons
-const InlinePlatformData = ({ platforms, type }: { platforms: any[], type: 'platform' | 'share' | 'rank' }) => {
+const InlinePlatformData = ({ platforms, type, theme }: { platforms: any[], type: 'platform' | 'share' | 'rank', theme?: string }) => {
 
   const getData = (platform: any) => {
     switch (type) {
@@ -320,6 +322,7 @@ export function CitationTypesDetailSection({ filterContext }: CitationTypesDetai
 
   // Skeleton loading
   const { showSkeleton, isVisible } = useSkeletonLoading(filterContext)
+  const { theme } = useTheme()
 
   const toggleRow = (type: string) => {
     setExpandedRows(prev => 
@@ -498,21 +501,21 @@ export function CitationTypesDetailSection({ filterContext }: CitationTypesDetai
                             </TableCell>
                             <TableCell className="py-3">
                               {link.platforms ? (
-                                <InlinePlatformData platforms={link.platforms} type="platform" />
+                                <InlinePlatformData platforms={link.platforms} type="platform" theme={theme} />
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
                             </TableCell>
                             <TableCell className="py-3">
                               {link.platforms ? (
-                                <InlinePlatformData platforms={link.platforms} type="share" />
+                                <InlinePlatformData platforms={link.platforms} type="share" theme={theme} />
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
                             </TableCell>
                             <TableCell className="py-3">
                               {link.platforms ? (
-                                <InlinePlatformData platforms={link.platforms} type="rank" />
+                                <InlinePlatformData platforms={link.platforms} type="rank" theme={theme} />
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
@@ -621,13 +624,13 @@ export function CitationTypesDetailSection({ filterContext }: CitationTypesDetai
               {/* Two boxes side by side */}
               <div className="grid grid-cols-2 gap-4">
                 {/* Prompt box on the left */}
-                <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="p-4 bg-muted/50 rounded-lg">
                   <h4 className="font-semibold text-sm mb-2">Prompt</h4>
                   <p className="text-sm text-muted-foreground">{selectedLink.promptSummary || 'How can I personalize user experiences to increase engagement?'}</p>
                 </div>
                 
                 {/* Citation Details box on the right */}
-                <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="p-4 bg-muted/50 rounded-lg">
                   <h4 className="font-semibold text-sm mb-2">Citation Details</h4>
                   <p className="text-sm text-muted-foreground">{selectedLink.title}</p>
                   <p className="text-sm text-muted-foreground mt-1">{selectedLink.url}</p>
@@ -665,13 +668,13 @@ export function CitationTypesDetailSection({ filterContext }: CitationTypesDetai
                 ) || []
                 
                 return filteredPlatforms.length > 0 && (
-                  <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <div className="p-4 bg-muted/50 rounded-lg">
                     <h4 className="font-semibold text-sm mb-3">LLM Answers</h4>
                     <div className="space-y-3">
                       {filteredPlatforms.map((platform: any, index: number) => (
                         <div key={index} className="border rounded-lg p-3 relative">
                           {/* Favicon tag in top left */}
-                          <div className="absolute -top-2 -left-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full p-1 shadow-sm">
+                          <div className="absolute -top-2 -left-2 bg-background border border-border rounded-full p-1 shadow-sm">
                             <img 
                               src={getFaviconUrl(platform.name)} 
                               alt={platform.name}

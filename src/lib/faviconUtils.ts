@@ -39,13 +39,49 @@ export const generateDomainVariations = (cleanName: string): string[] => {
  * @param size - Favicon size (default: 16)
  * @returns Favicon URL
  */
-export const getDynamicFaviconUrl = (companyName: string, size: number = 16): string => {
+export const getDynamicFaviconUrl = (companyName: string, size: number = 16, isDarkMode?: boolean): string => {
+  // Special handling for Grok with theme awareness
+  if (companyName === 'Grok' && isDarkMode !== undefined) {
+    return getGrokFaviconUrl(isDarkMode, size)
+  }
+  
+  // First check for known platform mappings
+  const faviconMap: Record<string, string> = {
+    'ChatGPT': 'https://chat.openai.com/favicon.ico',
+    'Claude': 'https://claude.ai/favicon.ico',
+    'Gemini': 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg',
+    'Perplexity': 'https://www.perplexity.ai/favicon.ico',
+    'Grok': 'https://grok.x.ai/favicon.ico'
+  }
+  
+  // Return specific mapping if available
+  if (faviconMap[companyName]) {
+    return faviconMap[companyName]
+  }
+  
+  // Fallback to dynamic generation for other companies
   const cleanName = cleanCompanyName(companyName)
   const domainVariations = generateDomainVariations(cleanName)
   
   // Use Google's favicon service with the first domain variation
   // Google's service is smart enough to find favicons for most domains
   return `https://www.google.com/s2/favicons?domain=${domainVariations[0]}&sz=${size}`
+}
+
+/**
+ * Gets a theme-aware favicon URL for Grok
+ * @param isDarkMode - Whether dark mode is active
+ * @param size - Favicon size (default: 16)
+ * @returns Theme-aware Grok favicon URL
+ */
+export const getGrokFaviconUrl = (isDarkMode: boolean, size: number = 16): string => {
+  if (isDarkMode) {
+    // Use a white/light version for dark mode
+    return 'https://www.google.com/s2/favicons?domain=x.ai&sz=16&color=white'
+  } else {
+    // Use the original for light mode
+    return 'https://grok.x.ai/favicon.ico'
+  }
 }
 
 /**

@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -34,13 +35,14 @@ const rankings = [
   { rank: 5, platform: 'Grok', percentage: '10%', visits: '420', isTop: false },
 ]
 
-const getFaviconUrl = (platformName: string) => {
+const getFaviconUrl = (platformName: string, theme?: string) => {
+  const isDarkMode = theme === 'dark'
   const faviconMap = {
     'ChatGPT': 'https://chat.openai.com/favicon.ico',
     'Claude': 'https://claude.ai/favicon.ico',
-    'Gemini': 'https://gemini.google.com/favicon.ico',
+    'Gemini': 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg',
     'Perplexity': 'https://www.perplexity.ai/favicon.ico',
-    'Grok': 'https://x.ai/favicon.ico'
+    'Grok': isDarkMode ? 'https://www.google.com/s2/favicons?domain=x.ai&sz=16&color=white' : 'https://grok.x.ai/favicon.ico'
   }
   return faviconMap[platformName as keyof typeof faviconMap] || `https://www.google.com/s2/favicons?domain=${platformName.toLowerCase()}.com&sz=16`
 }
@@ -75,6 +77,7 @@ export function PlatformTrafficCard({
   showComparison
 }: PlatformTrafficCardProps) {
   const [hoveredBar, setHoveredBar] = useState<{ platform: string; percentage: number; visits: number; x: number; y: number } | null>(null)
+  const { theme } = useTheme()
   const [chartType, setChartType] = useState('bar')
   const [activePlatform, setActivePlatform] = useState(platformData[0].platform)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -343,7 +346,7 @@ export function PlatformTrafficCard({
                         onClick={() => setActivePlatform(item.platform)}
                       >
                         <img 
-                          src={getFaviconUrl(item.platform)} 
+                          src={getFaviconUrl(item.platform, theme)} 
                           alt={item.platform}
                           className="w-4 h-4 rounded-sm"
                           onError={(e) => {
@@ -453,7 +456,7 @@ export function PlatformTrafficCard({
                                    </span>
                           <div className="flex items-center gap-2">
                             <img 
-                              src={getFaviconUrl(item.platform)} 
+                              src={getFaviconUrl(item.platform, theme)} 
                               alt={item.platform}
                               className="w-4 h-4 rounded-sm"
                               onError={(e) => {

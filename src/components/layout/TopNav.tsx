@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Filter, Globe, ChevronDown, Users } from 'lucide-react'
 import { useFilters } from '@/contexts/FilterContext'
+import { useTheme } from 'next-themes'
 
 interface TopNavProps {
   activeTab: string
@@ -23,6 +24,7 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
     setSelectedTopics, 
     setSelectedPersonas 
   } = useFilters()
+  const { theme } = useTheme()
   
   const tabs = [
     { id: 'visibility', label: 'Visibility' },
@@ -44,12 +46,13 @@ export function TopNav({ activeTab, onTabChange }: TopNavProps) {
   ]
 
   const getFaviconUrl = (platformName: string) => {
+    const isDarkMode = theme === 'dark'
     const faviconMap = {
       'ChatGPT': 'https://chat.openai.com/favicon.ico',
       'Claude': 'https://claude.ai/favicon.ico',
-      'Gemini': 'https://gemini.google.com/favicon.ico',
+      'Gemini': 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg',
       'Perplexity': 'https://www.perplexity.ai/favicon.ico',
-      'Grok': 'https://x.ai/favicon.ico'
+      'Grok': isDarkMode ? 'https://www.google.com/s2/favicons?domain=x.ai&sz=16&color=white' : 'https://grok.x.ai/favicon.ico'
     }
     return faviconMap[platformName as keyof typeof faviconMap] || `https://www.google.com/s2/favicons?domain=${platformName.toLowerCase()}.com&sz=16`
   }
